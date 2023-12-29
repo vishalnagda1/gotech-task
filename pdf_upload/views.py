@@ -19,3 +19,21 @@ def signup(request):
         except Exception as e:
             return JsonResponse({'message': 'Signup failed', 'exception': str(e)}, status=422)
 
+
+@csrf_exempt
+def signin(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return JsonResponse({'message': 'Login successful'})
+            else:
+                return JsonResponse({'message': 'Login failed'}, status=401)
+        except Exception as e:
+            return JsonResponse({'message': 'Login failed', 'exception': str(e)}, status=422)
