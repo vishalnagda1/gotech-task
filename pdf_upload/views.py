@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 import json
+import os
 
 from .models import CustomUser, UploadedFile
 from .decorators import custom_login_required  # Import the custom decorator
@@ -76,3 +77,13 @@ def upload_file(request):
             return JsonResponse({'message': 'File uploaded successfully'})
         except Exception as e:
             return JsonResponse({'message': 'File upload failed', 'exception': str(e)}, status=422)
+
+
+@custom_login_required
+def list_files(request):
+    user = request.user
+    files = UploadedFile.objects.filter(user=user)
+    
+    file_list = [{'file_id': file.id, 'file_name': os.path.basename(file.file.name)} for file in files]
+    
+    return JsonResponse({'files': file_list})
