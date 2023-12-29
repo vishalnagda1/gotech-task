@@ -9,9 +9,13 @@ from .models import CustomUser
 @csrf_exempt
 def signup(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
 
-        user = CustomUser.objects.create_user(username=username, password=password)
-        return JsonResponse({'message': 'User created successfully'})
+            user = CustomUser.objects.create_user(username=username, password=password)
+            return JsonResponse({'message': 'User created successfully'})
+        except Exception as e:
+            return JsonResponse({'message': 'Signup failed', 'exception': str(e)}, status=422)
+
