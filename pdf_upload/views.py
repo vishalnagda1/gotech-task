@@ -12,7 +12,7 @@ import io
 # from django.core.files.base import ContentFile
 # from django.core.files.storage import default_storage
 
-from .models import CustomUser, UploadedFile
+from .models import CustomUser, UploadedFile, ExtractedData
 from .decorators import custom_login_required  # Import the custom decorator
 
 
@@ -198,6 +198,14 @@ def extract_images_and_text(request, file_id):
 
             # Extract text
             text = extract_text_from_pdf(file_path)
+
+            # Save extracted data to the database
+            extracted_data = ExtractedData(
+                uploaded_file=uploaded_file,
+                text=text,
+                image_paths=images
+            )
+            extracted_data.save()
 
             return JsonResponse({'images': images, 'text': text})
         except UploadedFile.DoesNotExist:
