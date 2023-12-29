@@ -9,6 +9,8 @@ import fitz  # PyMuPDF
 import json
 import os
 import io
+import time  # Import for timestamp generation
+import uuid  # Import for UUID generation
 # from django.core.files.base import ContentFile
 # from django.core.files.storage import default_storage
 
@@ -221,6 +223,13 @@ def ensure_directory_exists(directory):
         os.makedirs(directory)
 
 
+def generate_unique_image_path(page_num, img_index):
+    # Use a combination of timestamp and a random string (uuid) for uniqueness
+    timestamp = str(int(time.time() * 1000))  # milliseconds since epoch
+    unique_id = str(uuid.uuid4())[:8]  # use the first 8 characters of the uuid
+    return f"page_{page_num + 1}_img_{img_index + 1}_{timestamp}_{unique_id}.png"
+
+
 def extract_images_from_pdf(pdf_path):
     images = []
     pdf_document = fitz.open(pdf_path)
@@ -239,7 +248,12 @@ def extract_images_from_pdf(pdf_path):
             save_directory = os.path.join(settings.MEDIA_ROOT, "extracted_images")
             ensure_directory_exists(save_directory)
 
-            image_path = os.path.join(save_directory, f"page_{page_num + 1}_img_{img_index + 1}.png")
+            # Generate a unique image path
+            image_path = os.path.join(
+                save_directory,
+                generate_unique_image_path(page_num, img_index)
+            )
+
             image.save(image_path)
             images.append(image_path)
 
