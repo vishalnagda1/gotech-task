@@ -4,8 +4,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from PIL import Image
+import fitz  # PyMuPDF
 import json
 import os
+import io
 # from django.core.files.base import ContentFile
 # from django.core.files.storage import default_storage
 
@@ -176,11 +179,6 @@ def download_file(request, file_id):
     except Exception as e:
         return JsonResponse({'message': 'File download failed', 'exception': str(e)}, status=422)
 
-
-from PIL import Image
-import fitz  # PyMuPDF
-import pytesseract
-import io
 
 @csrf_exempt
 @custom_login_required
