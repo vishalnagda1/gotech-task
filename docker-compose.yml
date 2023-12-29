@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: psql
+    restart: always
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: tset
+      POSTGRES_DB: gotech
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ~/dev/db-data/psql/gotech:/db-dump
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  db-admin:
+    image: adminer
+    container_name: pg-admin
+    restart: always
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: pgsql
+      ADMINER_DEFAULT_DB_HOST: db
+      ADMINER_DEFAULT_DB_NAME: gotech
+      ADMINER_DESIGN: nette
+      ADMINER_PLUGINS: tables-filter tinymce
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+    name: app-network
+
+volumes:
+  db-data:
