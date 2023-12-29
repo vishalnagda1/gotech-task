@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -37,3 +37,9 @@ def signin(request):
                 return JsonResponse({'message': 'Login failed'}, status=401)
         except Exception as e:
             return JsonResponse({'message': 'Login failed', 'exception': str(e)}, status=422)
+
+
+def signout(request):
+    logout(request)
+    return JsonResponse({'message': 'Signout successful'})
+
