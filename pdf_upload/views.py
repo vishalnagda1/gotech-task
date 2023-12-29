@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 import json
 
-from .models import CustomUser
+from .models import CustomUser, UploadedFile
 
 
 @csrf_exempt
@@ -43,3 +45,32 @@ def signout(request):
     logout(request)
     return JsonResponse({'message': 'Signout successful'})
 
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == 'POST':
+        try:
+            user = request.user  # The @login_required decorator ensures the user is authenticated
+
+            uploaded_file = request.FILES.get('file')
+
+            # Check file size
+            max_size = 10 * 1024 * 1024  # 10 MB in bytes
+            if uploaded_file.size > max_size:
+                return JsonResponse({'message': 'File size exceeds 10 MB limit'}, status=400)
+
+            # Validate file type
+            allowed_extensions = ['pdf', 'docx', 'jpeg', 'jpg']
+            validator = FileExtensionValidator(allowed_extensions)
+            try:
+                validator(uploaded_file)
+            except ValidationError as e:
+                return JsonResponse({'message': 'Invalid file type', 'exception': str(e)}, status=400)
+
+            # Save the uploaded file
+            uploaded_file_instance = UploadedFile(user=user, file=uploaded_file)
+            uploaded_file_instance.save()
+
+            return JsonResponse({'message': 'File uploaded successfully'})
+        except Exception as e:
+            return JsonResponse({'message': 'File upload failed', 'exception': str(e)}, status=422)
