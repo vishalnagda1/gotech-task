@@ -199,9 +199,12 @@ def extract_images_and_text(request, file_id):
             force_extraction = json.loads(request.body).get('force_extraction', False)
 
             if not extraction_data_exists or force_extraction:
-                # Delete existing extracted data if force extraction is True
+                # Delete existing extracted images if force extraction is True
                 if force_extraction:
-                    ExtractedData.objects.filter(uploaded_file=uploaded_file).delete()
+                    delete_extracted_images(uploaded_file)
+
+                # Delete existing extracted data
+                ExtractedData.objects.filter(uploaded_file=uploaded_file).delete()
 
                 # Get the file path
                 file_path = uploaded_file.file.path
@@ -223,7 +226,7 @@ def extract_images_and_text(request, file_id):
                 return JsonResponse({'images': images, 'text': text, 'message': 'Extraction successful'})
             else:
                 # Extraction data already exists, return the existing data
-                extraction_data = ExtractedData.objects.filter(uploaded_file=uploaded_file).first()
+                extraction_data = ExtractedData.objects.get(uploaded_file=uploaded_file)
                 return JsonResponse({'images': extraction_data.image_paths, 'text': extraction_data.text, 'message': 'Extraction data already exists'}, status=409)
         except UploadedFile.DoesNotExist:
             return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
@@ -232,6 +235,17 @@ def extract_images_and_text(request, file_id):
 
 
 # Helper functions
+
+def delete_extracted_images(uploaded_file):
+    # Delete extracted images associated with the uploaded file
+    extraction_data = ExtractedData.objects.filter(uploaded_file=uploaded_file).first()
+    if extraction_data:
+        for image_path in extraction_data.image_paths:
+            try:
+                os.remove(image_path)
+            except Exception as e:
+                print(f"Error deleting image: {image_path}, {str(e)}")
+
 
 def ensure_directory_exists(directory):
     if not os.path.exists(directory):
