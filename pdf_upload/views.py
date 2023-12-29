@@ -192,24 +192,39 @@ def extract_images_and_text(request, file_id):
             # Check if the file belongs to the authenticated user
             uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
 
-            # Get the file path
-            file_path = uploaded_file.file.path
+            # Check if extraction data already exists
+            extraction_data_exists = ExtractedData.objects.filter(uploaded_file=uploaded_file).exists()
 
-            # Extract images
-            images = extract_images_from_pdf(file_path)
+            # Check if force extraction flag is provided
+            force_extraction = json.loads(request.body).get('force_extraction', False)
 
-            # Extract text
-            text = extract_text_from_pdf(file_path)
+            if not extraction_data_exists or force_extraction:
+                # Delete existing extracted data if force extraction is True
+                if force_extraction:
+                    ExtractedData.objects.filter(uploaded_file=uploaded_file).delete()
 
-            # Save extracted data to the database
-            extracted_data = ExtractedData(
-                uploaded_file=uploaded_file,
-                text=text,
-                image_paths=images
-            )
-            extracted_data.save()
+                # Get the file path
+                file_path = uploaded_file.file.path
 
-            return JsonResponse({'images': images, 'text': text})
+                # Extract images
+                images = extract_images_from_pdf(file_path)
+
+                # Extract text
+                text = extract_text_from_pdf(file_path)
+
+                # Save extracted data to the database
+                extracted_data = ExtractedData(
+                    uploaded_file=uploaded_file,
+                    text=text,
+                    image_paths=images
+                )
+                extracted_data.save()
+
+                return JsonResponse({'images': images, 'text': text, 'message': 'Extraction successful'})
+            else:
+                # Extraction data already exists, return the existing data
+                extraction_data = ExtractedData.objects.filter(uploaded_file=uploaded_file).first()
+                return JsonResponse({'images': extraction_data.image_paths, 'text': extraction_data.text, 'message': 'Extraction data already exists'}, status=409)
         except UploadedFile.DoesNotExist:
             return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
         except Exception as e:
