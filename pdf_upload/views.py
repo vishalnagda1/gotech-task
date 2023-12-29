@@ -5,6 +5,8 @@ from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 import json
 import os
+# from django.core.files.base import ContentFile
+# from django.core.files.storage import default_storage
 
 from .models import CustomUser, UploadedFile
 from .decorators import custom_login_required  # Import the custom decorator
@@ -87,3 +89,46 @@ def list_files(request):
     file_list = [{'file_id': file.id, 'file_name': os.path.basename(file.file.name)} for file in files]
     
     return JsonResponse({'files': file_list})
+
+
+@csrf_exempt
+@custom_login_required
+def rename_file(request, file_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            new_name = data.get('new_name')
+
+            # Ensure the new_name is not None
+            if new_name is None:
+                return JsonResponse({'message': 'New file name cannot be None'}, status=400)
+
+            user = request.user
+
+            # Check if the file belongs to the authenticated user
+            uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
+
+            # Get the current content of the file
+            file_content = uploaded_file.file.read()
+
+            # Close the file before renaming
+            uploaded_file.file.close()
+
+            # Rename the file using Storage's move method
+            new_file_name = os.path.join('uploads', new_name)
+            # new_file_path = default_storage.save(new_file_name, ContentFile(file_content))
+
+            # if default_storage.exists(uploaded_file.file.path):
+            #     default_storage.delete(uploaded_file.file.path)
+
+            # # Update the file field with the new path
+            # uploaded_file.file.name = new_file_path
+            os.rename(uploaded_file.file.path, new_file_name)
+            uploaded_file.file.name = new_file_name
+            uploaded_file.save()
+
+            return JsonResponse({'message': 'File renamed successfully'})
+        except UploadedFile.DoesNotExist:
+            return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
+        except Exception as e:
+            return JsonResponse({'message': 'File rename failed', 'exception': str(e)}, status=422)
