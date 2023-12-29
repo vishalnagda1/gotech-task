@@ -56,7 +56,7 @@ def signout(request):
 def upload_file(request):
     if request.method == 'POST':
         try:
-            user = request.user  # The @login_required decorator ensures the user is authenticated
+            user = request.user
 
             uploaded_file = request.FILES.get('file')
 
