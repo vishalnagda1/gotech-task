@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
@@ -153,3 +153,23 @@ def delete_file(request, file_id):
             return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
         except Exception as e:
             return JsonResponse({'message': 'File deletion failed', 'exception': str(e)}, status=422)
+
+
+@custom_login_required
+def download_file(request, file_id):
+    try:
+        user = request.user
+
+        # Check if the file belongs to the authenticated user
+        uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
+
+        # Prepare the file for download
+        file_path = uploaded_file.file.path
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+    except UploadedFile.DoesNotExist:
+        return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
+    except Exception as e:
+        return JsonResponse({'message': 'File download failed', 'exception': str(e)}, status=422)
