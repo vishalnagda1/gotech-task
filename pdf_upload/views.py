@@ -175,3 +175,77 @@ def download_file(request, file_id):
         return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
     except Exception as e:
         return JsonResponse({'message': 'File download failed', 'exception': str(e)}, status=422)
+
+
+from PIL import Image
+import fitz  # PyMuPDF
+import pytesseract
+import io
+
+@csrf_exempt
+@custom_login_required
+def extract_images_and_text(request, file_id):
+    if request.method == 'POST':
+        try:
+            user = request.user
+
+            # Check if the file belongs to the authenticated user
+            uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
+
+            # Get the file path
+            file_path = uploaded_file.file.path
+
+            # Extract images
+            images = extract_images_from_pdf(file_path)
+
+            # Extract text
+            text = extract_text_from_pdf(file_path)
+
+            return JsonResponse({'images': images, 'text': text})
+        except UploadedFile.DoesNotExist:
+            return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
+        except Exception as e:
+            return JsonResponse({'message': 'Extraction failed', 'exception': str(e)}, status=500)
+
+
+# Helper functions
+
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def extract_images_from_pdf(pdf_path):
+    images = []
+    pdf_document = fitz.open(pdf_path)
+
+    for page_num in range(pdf_document.page_count):
+        page = pdf_document[page_num]
+        images_in_page = page.get_images(full=True)
+        
+        for img_index, img_info in enumerate(images_in_page):
+            image_index = img_info[0]
+            base_image = pdf_document.extract_image(image_index)
+            image_bytes = base_image["image"]
+            image = Image.open(io.BytesIO(image_bytes))
+
+            # Ensure the directory exists before saving the image
+            save_directory = os.path.join(settings.MEDIA_ROOT, "extracted_images")
+            ensure_directory_exists(save_directory)
+
+            image_path = os.path.join(save_directory, f"page_{page_num + 1}_img_{img_index + 1}.png")
+            image.save(image_path)
+            images.append(image_path)
+
+    return images
+
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    pdf_document = fitz.open(pdf_path)
+
+    for page_num in range(pdf_document.page_count):
+        page = pdf_document[page_num]
+        text += page.get_text()
+
+    return text
