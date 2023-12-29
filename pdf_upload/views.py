@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.conf import settings
 import json
 import os
 # from django.core.files.base import ContentFile
@@ -115,7 +116,7 @@ def rename_file(request, file_id):
             uploaded_file.file.close()
 
             # Rename the file using Storage's move method
-            new_file_name = os.path.join('uploads', new_name)
+            new_file_name = os.path.join(settings.MEDIA_ROOT, 'uploads', new_name)
             # new_file_path = default_storage.save(new_file_name, ContentFile(file_content))
 
             # if default_storage.exists(uploaded_file.file.path):
@@ -123,6 +124,7 @@ def rename_file(request, file_id):
 
             # # Update the file field with the new path
             # uploaded_file.file.name = new_file_path
+            print("uploaded_file.file.path:", uploaded_file.file.path)
             os.rename(uploaded_file.file.path, new_file_name)
             uploaded_file.file.name = new_file_name
             uploaded_file.save()
