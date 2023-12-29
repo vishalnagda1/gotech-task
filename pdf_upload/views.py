@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 import json
 
 from .models import CustomUser, UploadedFile
+from .decorators import custom_login_required  # Import the custom decorator
 
 
 @csrf_exempt
@@ -47,6 +48,7 @@ def signout(request):
 
 
 @csrf_exempt
+@custom_login_required  # Use the custom decorator
 def upload_file(request):
     if request.method == 'POST':
         try:
