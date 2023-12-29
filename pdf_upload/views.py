@@ -17,7 +17,7 @@ def signup(request):
             user = CustomUser.objects.create_user(username=username, password=password)
             return JsonResponse({'message': 'User created successfully'})
         except Exception as e:
-            return JsonResponse({'message': 'Signup failed', 'exception': str(e)}, status=422)
+            return JsonResponse({'message': 'Signup failed', 'exception': str(e)}, status=400)
 
 
 @csrf_exempt
@@ -36,7 +36,7 @@ def signin(request):
             else:
                 return JsonResponse({'message': 'Login failed'}, status=401)
         except Exception as e:
-            return JsonResponse({'message': 'Login failed', 'exception': str(e)}, status=422)
+            return JsonResponse({'message': 'Login failed', 'exception': str(e)}, status=400)
 
 
 def signout(request):
