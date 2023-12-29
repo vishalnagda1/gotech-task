@@ -132,3 +132,24 @@ def rename_file(request, file_id):
             return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
         except Exception as e:
             return JsonResponse({'message': 'File rename failed', 'exception': str(e)}, status=422)
+
+
+@csrf_exempt
+@custom_login_required
+def delete_file(request, file_id):
+    if request.method == 'DELETE':
+        try:
+            user = request.user
+
+            # Check if the file belongs to the authenticated user
+            uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
+
+            # Delete the file
+            uploaded_file.file.delete()
+            uploaded_file.delete()
+
+            return JsonResponse({'message': 'File deleted successfully'})
+        except UploadedFile.DoesNotExist:
+            return JsonResponse({'message': 'File not found or does not belong to the user'}, status=404)
+        except Exception as e:
+            return JsonResponse({'message': 'File deletion failed', 'exception': str(e)}, status=422)
