@@ -27,12 +27,13 @@ SECRET_KEY = 'django-insecure-wvbu3aiify60(aseo6)but4_k-^0fte9$m7%(4bv2fd95r#@(0
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500"]
 
 # Application definition
 
 INSTALLED_APPS = [
     'pdf_upload',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +48,7 @@ MEDIA_URL = '/media/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
