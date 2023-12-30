@@ -242,7 +242,8 @@ def delete_extracted_images(uploaded_file):
     if extraction_data:
         for image_path in extraction_data.image_paths:
             try:
-                os.remove(image_path)
+                full_image_path = str(settings.BASE_DIR) + image_path
+                os.remove(full_image_path)
             except Exception as e:
                 print(f"Error deleting image: {image_path}, {str(e)}")
 
@@ -284,7 +285,8 @@ def extract_images_from_pdf(pdf_path):
             )
 
             image.save(image_path)
-            images.append(image_path)
+            new_path = image_path.replace (str(settings.BASE_DIR), "")
+            images.append(new_path)
 
     return images
 
