@@ -151,6 +151,9 @@ def delete_file(request, file_id):
             # Check if the file belongs to the authenticated user
             uploaded_file = UploadedFile.objects.get(id=file_id, user=user)
 
+            # Delete existing extracted images
+            delete_extracted_images(uploaded_file)
+
             # Delete the file
             uploaded_file.file.delete()
             uploaded_file.delete()
