@@ -33,6 +33,26 @@ services:
       - "8080:8080"
     networks:
       - app-network
+  
+  django:
+    build:
+      context: .
+    container_name: django
+    restart: always
+    depends_on:
+      - db
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: tset
+      POSTGRES_DB: gotech
+      DJANGO_SETTINGS_MODULE: gotech.settings
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
 
 networks:
   app-network:
