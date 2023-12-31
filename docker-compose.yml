@@ -17,22 +17,22 @@ services:
     networks:
       - app-network
 
-  db-admin:
-    image: adminer
-    container_name: pg-admin
-    restart: always
-    depends_on:
-      - db
-    environment:
-      ADMINER_DEFAULT_DB_DRIVER: pgsql
-      ADMINER_DEFAULT_DB_HOST: db
-      ADMINER_DEFAULT_DB_NAME: gotech
-      ADMINER_DESIGN: nette
-      ADMINER_PLUGINS: tables-filter tinymce
-    ports:
-      - "8080:8080"
-    networks:
-      - app-network
+  # db-admin:
+  #   image: adminer
+  #   container_name: pg-admin
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     ADMINER_DEFAULT_DB_DRIVER: pgsql
+  #     ADMINER_DEFAULT_DB_HOST: db
+  #     ADMINER_DEFAULT_DB_NAME: gotech
+  #     ADMINER_DESIGN: nette
+  #     ADMINER_PLUGINS: tables-filter tinymce
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - app-network
   
   django:
     build:
