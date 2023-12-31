@@ -1,6 +1,8 @@
-__pycache__
+**/__pycache__
 .git
 .venv
 .dockerignore
 Dockerfile
 docker-compose.yml
+media/**
+.gitignore
