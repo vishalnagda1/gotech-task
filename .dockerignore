@@ -6,3 +6,5 @@ Dockerfile
 docker-compose.yml
 media/**
 .gitignore
+LICENSE
+README.md
