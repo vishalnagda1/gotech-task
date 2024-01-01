@@ -1,6 +1,6 @@
 # PDF Image and Text Extract
 
-[![GitHub license](https://img.shields.io/github/license/vishalnagda1/gotech-task?style=plastic)](https://github.com/vishalnagda1/gotech-task/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/vishalnagda1/gotech-task/blob/main/LICENSE)
 
 PDF Image and Text Extract is a Python-Django project and uses the PostgreSQL database to store the data.
 
