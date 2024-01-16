@@ -4,7 +4,7 @@
 
 PDF Image and Text Extract is a Python-Django project and uses the PostgreSQL database to store the data.
 
-**PDF Image and Text Extract project following APIs**
+**PDF Image and Text Extract project includes following APIs**
 
 - SignUp
 - SignIn
